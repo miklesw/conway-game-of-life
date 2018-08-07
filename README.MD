@@ -20,28 +20,27 @@ Any cells spawned out of reproduction will be assigned the average color of it's
 ## Design Decisions
 
 ### Maintaining Grid State
-- HashMap best choice for quick retrieval of cells by position.
+- HashMap best choice for quick retrieval of cell state by position.
 - Should CellPosition & CellState exist as part of a Cell object? 
-- GridManager doing too much?
+- GridManager doing too much?  TODO: Review GridManager class. move grid locks and map to GridRepository?
 
-TODO: review
+#### Concurrency
 
-### Concurrency
+Although the `ConcurrentHashMap` is threadsafe, it does not ensure atomic operations (e.g read + write). Typically this is addressed using `computeIfAbsent()` or the `synchronized` keyword.
 
-ConcurrentHashMap is not enough. What if a user attempts to spawn a cell while determining next state?
+When computing the next grid state, the next state for the entire grid needs to be determined before any cell state changes are applied. This means that there is race condition while determining the next state, any requests to spawn a cell may result in an inconsistent grid state or conflicts. (e.g. next state computation tries to spawn a cell with color X, but it has already been spawned by a user with color y).
 
-If the user spawns a cell that will be spawned in the next state, before the state has been applied but after it's next state has been determined, the GridManager will fail to apply the state to that cell.
+The `synchonized` keyword does not provide sufficient flexibility to handle this scenario. `ReentrantLock` was used since it allows for a shared lock between the `spawnCell()`, `nextState()` and `killCell()` methods
 
-TODO: handle exception. 
-TODO: prevent conflict?
+A problem with this approach is that `nextState()` may keep the lock for too long depending on the size of the grid. This may result in wait timeouts if the front-end will expect a response when it makes a request to spawn a cell. Async requests for spawning cells may need to be considered.
 
 ### Cell Change Events
 
-Cell change events are triggered when a user spawns a cell and when the next grid state is applied. This allows individual cell updates to be sent to the frontend via websockets. As a result, the frontend only needs to receive the entire grid on initial connection or when reconnecting.
+Cell change events are triggered when a user spawns a cell and for individual cell changes when the next grid state is applied. This allows individual cell updates to be sent to the frontend via websockets. As a result, the frontend only needs to receive the entire grid on initial connection or when reconnecting.
 
-This implementation uses spring events for simplicity. The GridEventPublisher interface can be used to easily switch to other messaging technologies.
+This implementation uses spring events for simplicity. The `GridEventPublisher` interface can be used to easily switch to other messaging technologies.
 
 
 ### Maintaining a user's assigned color 
 
-TODO: using session id to maintain a map of user colors, so that 
+TODO: using session id to maintain a map of user colors

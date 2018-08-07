@@ -1,49 +1,34 @@
 package com.miklesw.conway.grid;
 
-import com.google.common.collect.ImmutableMap;
 import com.miklesw.conway.grid.events.GridEventPublisher;
+import com.miklesw.conway.grid.model.CellPosition;
+import com.miklesw.conway.grid.model.CellState;
 import com.miklesw.conway.utils.ColorUtils;
 
 import java.awt.*;
 import java.util.*;
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
-import static com.miklesw.conway.grid.util.GridUtils.findNeighbouringCells;
+import static com.miklesw.conway.grid.util.GridUtils.determineNeighbouringCells;
 import static java.util.stream.Collectors.toList;
 
 
-public class GridManager {
+public class GridService {
 
-    private Map<CellPosition, CellState> grid;
-
-    private final Lock gridState = new ReentrantLock();
+    private final Grid grid;
 
     private final GridEventPublisher gridEventPublisher;
 
-    private final int gridSizeX;
-
-    private final int gridSizeY;
-
-
-    public GridManager(GridEventPublisher gridEventPublisher, int gridSizeX, int gridSizeY) {
+    public GridService(Grid grid, GridEventPublisher gridEventPublisher) {
+        this.grid = grid;
         this.gridEventPublisher = gridEventPublisher;
-        this.gridSizeX = gridSizeX;
-        this.gridSizeY = gridSizeY;
-        generateGrid();
-    }
-
-    public Map<CellPosition, CellState> getGrid() {
-        return ImmutableMap.copyOf(grid);
     }
 
     public void spawnCell(CellPosition position, Color color) {
-        gridState.lock();
+        grid.lock();
 
         try {
-            CellState currentState = grid.get(position);
+            CellState currentState = grid.getCellState(position);
 
             if (currentState.isLive()) {
                 String message = String.format("Cell at %s is already live with colour %s!", position, currentState.getColor());
@@ -51,32 +36,32 @@ public class GridManager {
             }
 
             CellState liveState = CellState.live(color);
-            grid.put(position, liveState);
+            grid.updateCellState(position, liveState);
             gridEventPublisher.publishCellChangedEvent(position, liveState);
         } finally {
-            gridState.unlock();
+            grid.unlock();
         }
     }
 
     private void killCell(CellPosition position) {
-        gridState.lock();
+        grid.lock();
 
         try {
-            grid.put(position, CellState.dead());
+            grid.updateCellState(position, CellState.dead());
             gridEventPublisher.publishCellChangedEvent(position, CellState.dead());
         } finally {
-            gridState.unlock();
+            grid.unlock();
         }
     }
 
-    public void nextState() {
+    public void computeNextState() {
         Set<CellPosition> cellsToKill = new HashSet<>();
         Map<CellPosition, Color> cellsToSpawn = new HashMap<>();
 
-        gridState.lock();
+        grid.lock();
         try {
             // determine next state
-            for (Map.Entry<CellPosition, CellState> gridEntry : this.grid.entrySet()) {
+            for (Map.Entry<CellPosition, CellState> gridEntry : grid.getCells().entrySet()) {
                 CellPosition cellPosition = gridEntry.getKey();
                 CellState cellState = gridEntry.getValue();
 
@@ -92,10 +77,14 @@ public class GridManager {
 
             // apply state
             cellsToKill.forEach(this::killCell);
+
+            // not handling runtime exception because:
+            // - forEach swallows runtime exceptions
+            // - locks will prevent race conditions when computing state
             cellsToSpawn.forEach(this::spawnCell);
 
         } finally {
-            gridState.unlock();
+            grid.unlock();
         }
     }
 
@@ -107,19 +96,11 @@ public class GridManager {
     }
 
     private List<CellState> findLiveNeighbourCellStates(CellPosition cellPosition) {
-        return findNeighbouringCells(cellPosition, gridSizeX, gridSizeY).stream()
-                .map(grid::get)
+        return determineNeighbouringCells(cellPosition, grid.getGridSizeX(), grid.getGridSizeY()).stream()
+                .map(grid::getCellState)
                 .filter(CellState::isLive)
                 .collect(toList());
     }
 
-    private void generateGrid() {
-        this.grid = new ConcurrentHashMap<>();
-        for (int x = 1; x <= gridSizeX; x++) {
-            for (int y = 1; y <= gridSizeY; y++) {
-                CellPosition position = new CellPosition(x, y);
-                grid.put(position, CellState.dead());
-            }
-        }
-    }
+
 }

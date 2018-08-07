@@ -1,4 +1,4 @@
-package com.miklesw.conway.grid;
+package com.miklesw.conway.grid.model;
 
 import java.util.Objects;
 

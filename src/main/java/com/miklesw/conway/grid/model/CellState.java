@@ -1,4 +1,4 @@
-package com.miklesw.conway.grid;
+package com.miklesw.conway.grid.model;
 
 import org.springframework.util.Assert;
 
@@ -15,12 +15,12 @@ public class CellState {
         this.color = color;
     }
 
-    static CellState live(Color color) {
+    public static CellState live(Color color) {
         Assert.notNull(color, "Live cells must be assigned a color");
         return new CellState(true, color);
     }
 
-    static CellState dead() {
+    public static CellState dead() {
         return new CellState(false, null);
     }
 

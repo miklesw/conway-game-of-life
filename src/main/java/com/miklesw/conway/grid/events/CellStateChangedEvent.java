@@ -1,7 +1,7 @@
 package com.miklesw.conway.grid.events;
 
-import com.miklesw.conway.grid.CellState;
-import com.miklesw.conway.grid.CellPosition;
+import com.miklesw.conway.grid.model.CellState;
+import com.miklesw.conway.grid.model.CellPosition;
 
 public class CellStateChangedEvent {
 

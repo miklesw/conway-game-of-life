@@ -7,6 +7,10 @@ public class CellPosition {
     private final int x;
     private final int y;
 
+    public CellPosition() {
+        this (0,0);
+    }
+
     public CellPosition(int x, int y) {
         this.x = x;
         this.y = y;

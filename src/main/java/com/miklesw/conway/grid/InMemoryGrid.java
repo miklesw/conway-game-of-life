@@ -3,6 +3,8 @@ package com.miklesw.conway.grid;
 import com.google.common.collect.ImmutableMap;
 import com.miklesw.conway.grid.model.CellPosition;
 import com.miklesw.conway.grid.model.CellState;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.util.Assert;
 
 import java.util.Map;
@@ -11,6 +13,8 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class InMemoryGrid implements Grid {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(InMemoryGrid.class);
 
     private static final String ERROR_INVALID_GRID_SIZE = "Grid size must be at least 2 x 2";
 
@@ -46,11 +50,13 @@ public class InMemoryGrid implements Grid {
 
     @Override
     public void lock() {
+        LOGGER.info("Acquiring grid lock.");
         lock.lock();
     }
 
     @Override
     public void unlock() {
+        LOGGER.info("Releasing grid lock.");
         lock.unlock();
     }
 
@@ -70,6 +76,7 @@ public class InMemoryGrid implements Grid {
     }
 
     private void initialize() {
+        // TODO: log
         for (int x = 1; x <= gridSizeX; x++) {
             for (int y = 1; y <= gridSizeY; y++) {
                 CellPosition position = new CellPosition(x, y);

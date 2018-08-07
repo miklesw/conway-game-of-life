@@ -24,6 +24,25 @@ TODO explain why there is not unit test for GridService.
 
 ## Design Decisions
 
+### Packaging
+
+Since this is a relatively small project all the packages have been implemented in a single module. 
+
+The project is made up of 3 main packages which can be cleanly extracted to independent modules/projects:
+
+- Grid (maintaining the grid's state)
+
+- Events (implementation and configuration of grid events)
+    - Grid
+    
+- Web (web layer implementation)
+    - Events
+    - Grid
+
+TODO explain why grid and event packages don't use annotation for component scanning and autowiring, whereas web packagedoes
+
+Furthermore, the grid and events packages could form part of an independent backend component if needed.
+
 ### Maintaining Grid State
 The `GridService` makes use of a `Grid` bean to maintain the state of the grid. 
 
@@ -31,7 +50,8 @@ In this solution the `Grid` interface has been implemented as an `InMemoryGrid` 
  - `ConcurrentHashMap` to store `CellState` by `CellPosition` 
  - `ReentrantLock` to maintain grid locks (see Concurrency section below)
 
-To scale the application across with multiple instances, the `Grid` interface can be implemented to use a distributed solution for storing states and locks, such as Hazelcast.
+#### Scaling
+To scale the application across multiple instances, the `Grid` interface can be implemented to use a distributed solution for storing states and locks, such as **Hazelcast**.
 
 #### Concurrency
 
@@ -47,8 +67,12 @@ A problem with this approach is that `computeNextState()` may keep the lock for 
 
 Cell change events are triggered when a user spawns a cell and for individual cell changes when the next grid state is applied. This allows individual cell updates to be sent to the frontend via websockets. As a result, the frontend only needs to receive the entire grid on initial connection or when reconnecting.
 
-This implementation uses spring events for simplicity. The `GridEventPublisher` interface can be used to easily switch to other messaging technologies.
+This implementation uses **Spring Events** for simplicity. The `@Async` annotation ensures that the handling of the event does not block the publishing thread.
 
+#### Scaling
+To scale the application across multiple instances, the application can be updated to use **Spring Integration** and a **Message Broker** instead of Spring Events, so that the `CellStateChangedEvent` is handled by the `CellStateChangeEventConsumer` in all instances.
+
+NOTE: When using Spring Integration, the `GridEventPublisher` may need to be changed to accept `CellStateChangedEvent` (instead of 2 parameters), so that implementation-less gateways can be used.
 
 ### Maintaining a user's assigned color 
 

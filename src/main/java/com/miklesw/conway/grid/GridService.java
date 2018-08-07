@@ -4,6 +4,8 @@ import com.miklesw.conway.grid.events.GridEventPublisher;
 import com.miklesw.conway.grid.model.CellPosition;
 import com.miklesw.conway.grid.model.CellState;
 import com.miklesw.conway.utils.ColorUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.awt.*;
 import java.util.*;
@@ -15,6 +17,8 @@ import static java.util.stream.Collectors.toList;
 
 public class GridService {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(GridService.class);
+
     private final Grid grid;
 
     private final GridEventPublisher gridEventPublisher;
@@ -25,6 +29,7 @@ public class GridService {
     }
 
     public void spawnCell(CellPosition position, Color color) {
+        LOGGER.info("Spawning cell at {} with {}.", position, color);
         grid.lock();
 
         try {
@@ -32,6 +37,7 @@ public class GridService {
 
             if (currentState.isLive()) {
                 String message = String.format("Cell at %s is already live with colour %s!", position, currentState.getColor());
+                LOGGER.warn(message);
                 throw new IllegalStateException(message);
             }
 
@@ -44,6 +50,7 @@ public class GridService {
     }
 
     private void killCell(CellPosition position) {
+        LOGGER.info("Killing cell at {}.", position);
         grid.lock();
 
         try {
@@ -55,12 +62,13 @@ public class GridService {
     }
 
     public void computeNextState() {
+        LOGGER.info("Computing next grid state.");
         Set<CellPosition> cellsToKill = new HashSet<>();
         Map<CellPosition, Color> cellsToSpawn = new HashMap<>();
 
         grid.lock();
         try {
-            // determine next state
+            LOGGER.info("Determining next grid state.");
             for (Map.Entry<CellPosition, CellState> gridEntry : grid.getCells().entrySet()) {
                 CellPosition cellPosition = gridEntry.getKey();
                 CellState cellState = gridEntry.getValue();
@@ -75,7 +83,7 @@ public class GridService {
                 }
             }
 
-            // apply state
+            LOGGER.info("Applying next grid state.");
             cellsToKill.forEach(this::killCell);
 
             // not handling runtime exception because:
@@ -83,6 +91,7 @@ public class GridService {
             // - locks will prevent race conditions when computing state
             cellsToSpawn.forEach(this::spawnCell);
 
+            LOGGER.info("Finished applying next grid state.");
         } finally {
             grid.unlock();
         }

@@ -1,4 +1,4 @@
-package com.miklesw.conway.grid.events;
+package com.miklesw.conway.events;
 
 import com.miklesw.conway.grid.model.CellState;
 import com.miklesw.conway.grid.model.CellPosition;

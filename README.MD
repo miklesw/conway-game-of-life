@@ -9,9 +9,7 @@ The game is modeled as a grid with 4 simple rules:
 - Any live cell with more than three live neighbours dies, as if by overcrowding.
 - Any dead cell with exactly three live neighbours becomes a live cell, as if by reproduction.
 
-Each user will be assigned a random color when they attempt to spawn a cell (bring it to life), which will then be assigned to the cell. 
-
-Any cells spawned out of reproduction will be assigned the average color of it's live nieghbouring cells.
+Users will be assigned a random color that will persist for the length of their session. If a color is assigned to a user session it may not be assigned to another user.
 
 This is an implementation of a recruitment technical challenge for [Fullstack-Backend Developers](https://hackmd.io/s/SyXikdg_g#Full-Stack--Backend-Developer--Eng-Manager).
 
@@ -28,22 +26,25 @@ TODO explain why there is not unit test for GridService.
 
 Since this is a relatively small project all the packages have been implemented in a single module. 
 
-The project is made up of 3 main packages which can be cleanly extracted to independent modules/projects:
+The project is made up of 4 main packages which can be cleanly extracted to independent modules/projects:
 
-- Grid (maintaining the grid's state)
+- com.miklesw.conway.grid (maintaining the grid's state)
 
-- Events (implementation and configuration of grid events)
-    - Grid
+- com.miklesw.conway.events (implementation and configuration of grid events)
+    - com.miklesw.conway.grid
     
-- Web (web layer implementation)
-    - Events
-    - Grid
+- com.miklesw.conway.schedule (scheduling of grid state computation)
+    - com.miklesw.conway.grid
+        
+- com.miklesw.conway.web (web layer implementation)
+    - com.miklesw.conway.events
+    - com.miklesw.conway.grid
 
 TODO explain why grid and event packages don't use annotation for component scanning and autowiring, whereas web packagedoes
 
 Furthermore, the grid and events packages could form part of an independent backend component if needed.
 
-### Maintaining Grid State
+### Maintaining the grid's state
 The `GridService` makes use of a `Grid` bean to maintain the state of the grid. 
 
 In this solution the `Grid` interface has been implemented as an `InMemoryGrid` consisting of:
@@ -65,7 +66,28 @@ The `synchonized` keyword does not provide sufficient flexibility to handle this
 
 A problem with this approach is that `computeNextState()` may keep the lock for too long, depending on the size of the grid. This may result in wait timeouts if the front-end will expect a response when it makes a request to spawn a cell. Async requests for spawning cells may need to be considered.
 
-### Cell Change Events
+### Computing the next grid state
+
+The grid state computation is triggers by a scheduled method that has a configurable fixed delay interval.
+
+### Maintaining a user's assigned color 
+
+There are many approaches available to maintain values for a user session with spring; `UserDetails` in the spring security context, session-scoped beans and session attributes.
+
+For the purposes of this project, the most suitable was to store a session attribute in the http session object. 
+
+An in-memory repository backed by a `Set` derived from `ConcurrentHashMap`, was implemented to maintain a list of assigned colors. This is used when generating a random color to ensure the color is not already assigned.
+
+Leveraging Spring's **http session events**, the assigned color is added and removed to the repository when a session is created or destroyed (expired). This will ensure that the colors are recycled for future use.
+
+#### Scaling
+
+For color assignment to scale across multiple instances, 2 changes are required (unless sticky sessions are used):
+
+- Implement a distributed repository for assigned colors.
+- Implement distributed sessions (Spring's `SessionRepository`)
+
+### Cell change events
 
 Cell change events are triggered when a user spawns a cell and for individual cell changes when the next grid state is applied. This allows individual cell updates to be sent to the frontend via websockets. As a result, the frontend only needs to receive the entire grid on initial connection or when reconnecting.
 
@@ -76,6 +98,10 @@ To scale the application across multiple instances, the application can be updat
 
 NOTE: When using Spring Integration, the `GridEventPublisher` may need to be changed to accept `CellStateChangedEvent` (instead of 2 parameters), so that implementation-less gateways can be used.
 
-### Maintaining a user's assigned color 
+### Publishing events to the client
 
-TODO: using session id to maintain a map of user colors
+#### Technologies
+
+SSE vs WebSockets vs Polling
+
+[Comparison](https://image.slidesharecdn.com/2015-06-22parisjswebsocketvsssev2-150624185438-lva1-app6891/95/websocket-vs-sse-parisjs-240615-11-638.jpg?cb=1435172291)

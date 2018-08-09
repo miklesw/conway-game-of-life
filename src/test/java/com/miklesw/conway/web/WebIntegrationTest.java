@@ -1,7 +1,5 @@
 package com.miklesw.conway.web;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.miklesw.conway.grid.Grid;
 import com.miklesw.conway.grid.model.CellPosition;
 import com.miklesw.conway.grid.model.CellState;
@@ -20,7 +18,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static com.miklesw.conway.utils.ColorUtils.toHexColor;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -29,13 +26,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource(
         properties = {
-                "grid.size.x=10",
-                "grid.size.y=10",
-                "grid.impl=memory",
-                "session.color.repo.impl=memory"
+                "grid.next.state.enabled=false"
         }
 )
-// TODO: disable scheduling
 public class WebIntegrationTest {
 
     @LocalServerPort

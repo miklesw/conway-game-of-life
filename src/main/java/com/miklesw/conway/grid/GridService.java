@@ -6,6 +6,7 @@ import com.miklesw.conway.grid.model.CellState;
 import com.miklesw.conway.utils.ColorUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.scheduling.annotation.Scheduled;
 
 import java.awt.*;
 import java.util.*;

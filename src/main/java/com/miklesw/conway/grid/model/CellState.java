@@ -50,7 +50,7 @@ public class CellState {
     public String toString() {
         return "CellState{" +
                 "live=" + live +
-                ", color=" + color +
+                ", session=" + color +
                 '}';
     }
 }

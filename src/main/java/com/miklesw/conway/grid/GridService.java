@@ -13,6 +13,7 @@ import java.util.List;
 
 import static com.miklesw.conway.grid.util.GridUtils.determineNeighbouringCells;
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
 
 
 public class GridService {
@@ -26,6 +27,13 @@ public class GridService {
     public GridService(Grid grid, GridEventPublisher gridEventPublisher) {
         this.grid = grid;
         this.gridEventPublisher = gridEventPublisher;
+    }
+
+    public Map<CellPosition, CellState> findLiveCells() {
+        // TODO: Test
+        return grid.getCells().entrySet().stream()
+                .filter((e) -> e.getValue().isLive())
+                .collect(toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
     public void spawnCell(CellPosition position, Color color) {

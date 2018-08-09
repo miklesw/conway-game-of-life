@@ -45,7 +45,8 @@ public class InMemoryGrid implements Grid {
 
     @Override
     public void updateCellState(CellPosition cellPosition, CellState cellState) {
-        grid.put(cellPosition, cellState);
+        // TODO: could add additional check to throw ex if cell position is not in the map.
+        grid.replace(cellPosition, cellState);
     }
 
     @Override
@@ -76,11 +77,12 @@ public class InMemoryGrid implements Grid {
     }
 
     private void initialize() {
-        // TODO: log
+        LOGGER.info("Initializing Grid...");
+        grid.clear();
         for (int x = 1; x <= gridSizeX; x++) {
             for (int y = 1; y <= gridSizeY; y++) {
                 CellPosition position = new CellPosition(x, y);
-                updateCellState(position, CellState.dead());
+                grid.put(position, CellState.dead());
             }
         }
     }

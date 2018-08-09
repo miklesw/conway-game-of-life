@@ -289,7 +289,7 @@ public class GridIntegrationTest {
     }
 
     @Configuration
-    @Import(GridConfiguration.class)
+    @Import(GridConfig.class)
     public static class TestGridConfiguration {
 
         @Bean

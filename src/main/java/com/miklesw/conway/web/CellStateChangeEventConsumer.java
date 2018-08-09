@@ -16,5 +16,6 @@ public class CellStateChangeEventConsumer {
     @EventListener
     public void onCellStateChanged(CellStateChangedEvent cellStateChangedEvent) {
         LOGGER.info("Handling cell state change event for cell at {} with {}", cellStateChangedEvent.getCellPosition(), cellStateChangedEvent.getCellState());
+        // TODO: publish events
     }
 }

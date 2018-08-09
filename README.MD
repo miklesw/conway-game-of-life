@@ -50,6 +50,8 @@ In this solution the `Grid` interface has been implemented as an `InMemoryGrid` 
  - `ConcurrentHashMap` to store `CellState` by `CellPosition` 
  - `ReentrantLock` to maintain grid locks (see Concurrency section below)
 
+NOTE: I was conflicted about whether the cell state and position belong together as part of a cell class, but in the end a map was the most sensible solution for accessing cell states, and I wasn't keen on having the position as both the map's key and an attribute.
+
 #### Scaling
 To scale the application across multiple instances, the `Grid` interface can be implemented to use a distributed solution for storing states and locks, such as **Hazelcast**.
 

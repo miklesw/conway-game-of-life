@@ -20,7 +20,7 @@ This is an implementation of a recruitment technical challenge for [Fullstack-Ba
 
 TODO explain why there is not unit test for GridService. 
 
-## Design Decisions
+## Design 
 
 ### Packaging
 
@@ -29,20 +29,10 @@ Since this is a relatively small project all the packages have been implemented 
 The project is made up of 4 main packages which can be cleanly extracted to independent modules/projects:
 
 - com.miklesw.conway.grid (maintaining the grid's state)
-
 - com.miklesw.conway.events (implementation and configuration of grid events)
-    - com.miklesw.conway.grid
-    
 - com.miklesw.conway.schedule (scheduling of grid state computation)
-    - com.miklesw.conway.grid
-        
 - com.miklesw.conway.web (web layer implementation)
-    - com.miklesw.conway.events
-    - com.miklesw.conway.grid
 
-TODO explain why grid and event packages don't use annotation for component scanning and autowiring, whereas web packagedoes
-
-Furthermore, the grid and events packages could form part of an independent backend component if needed.
 
 ### Maintaining the grid's state
 The `GridService` makes use of a `Grid` bean to maintain the state of the grid. 
@@ -94,14 +84,21 @@ Cell change events are triggered when a user spawns a cell and for individual ce
 This implementation uses **Spring Events** for simplicity. The `@Async` annotation ensures that the handling of the event does not block the publishing thread.
 
 #### Scaling
-To scale the application across multiple instances, the application can be updated to use **Spring Integration** and a **Message Broker** instead of Spring Events, so that the `CellStateChangedEvent` is handled by the `CellStateChangeEventConsumer` in all instances.
+To scale the application across multiple instances, the application can be updated to use **Spring Integration** and a **Message Broker** instead of Spring Events, so that the `CellStateChangedEvent` is handled by an event consumer in all instances.
 
 NOTE: When using Spring Integration, the `GridEventPublisher` may need to be changed to accept `CellStateChangedEvent` (instead of 2 parameters), so that implementation-less gateways can be used.
 
 ### Publishing events to the client
 
-#### Technologies
+A number of technologies have been considered to address this requirement, namely; **Websockets**, **Server-sent events (SSE)** and **polling**. 
 
-SSE vs WebSockets vs Polling
+A high-level comparison can be found [here](https://image.slidesharecdn.com/2015-06-22parisjswebsocketvsssev2-150624185438-lva1-app6891/95/websocket-vs-sse-parisjs-240615-11-638.jpg?cb=1435172291)
 
-[Comparison](https://image.slidesharecdn.com/2015-06-22parisjswebsocketvsssev2-150624185438-lva1-app6891/95/websocket-vs-sse-parisjs-240615-11-638.jpg?cb=1435172291)
+SSE was chosen based on 3 considerations:
+- Unidirectional streams were sufficient given requests to spawn a cell were handled by a REST endpoint.
+- Ease of implementation versus web sockets (polling was a non-starter)
+- Multiple claims that SSE provides better support for load balancing and better latency.
+
+Client-side support for Microsoft browsers can be addressed using one of many polyfils available.
+
+NOTE: **Spring Webflux's** WebClient was used to build a test SSE client, but it didn't seem to be a natural fit for the event use-case on the server. Additional reading may be required to see how it can be applied.

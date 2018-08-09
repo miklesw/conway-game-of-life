@@ -2,21 +2,27 @@ package com.miklesw.conway.web.model;
 
 import java.util.Objects;
 
-public class LiveCell {
+public class CellStateChangeInfo {
 
     private Position position;
+    private boolean live;
     private String color;
 
-    private LiveCell() {
+    private CellStateChangeInfo() {
     }
 
-    public LiveCell(Position position, String color) {
+    public CellStateChangeInfo(Position position, boolean live, String color) {
         this.position = position;
+        this.live = live;
         this.color = color;
     }
 
     public Position getPosition() {
         return position;
+    }
+
+    public boolean isLive() {
+        return live;
     }
 
     public String getColor() {
@@ -27,13 +33,14 @@ public class LiveCell {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        LiveCell liveCell = (LiveCell) o;
-        return Objects.equals(position, liveCell.position) &&
-                Objects.equals(color, liveCell.color);
+        CellStateChangeInfo that = (CellStateChangeInfo) o;
+        return live == that.live &&
+                Objects.equals(position, that.position) &&
+                Objects.equals(color, that.color);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(position, color);
+        return Objects.hash(position, live, color);
     }
 }

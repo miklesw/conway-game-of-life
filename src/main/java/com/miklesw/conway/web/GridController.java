@@ -5,6 +5,7 @@ import com.miklesw.conway.grid.model.CellPosition;
 import com.miklesw.conway.grid.model.CellState;
 import com.miklesw.conway.web.model.GridSize;
 import com.miklesw.conway.web.model.LiveCell;
+import com.miklesw.conway.web.model.Position;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,15 +38,17 @@ public class GridController {
         return null;
     }
 
+    /**
+     * The front-end only needs the current list of live cells to initialise grid state.
+     * Dead cells can be determined using the grid size.
+     */
     @RequestMapping(path = "/grid/cells/live", method = RequestMethod.GET)
     public List<LiveCell> liveCells() {
         Map<CellPosition, CellState> liveCells = gridService.findLiveCells();
-        return liveCells.entrySet().stream()
-                .map(e -> new LiveCell(e.getKey().getX(), e.getKey().getY(), toHexColor(e.getValue().getColor())))
-                .collect(toList());
+        return toLiveCellList(liveCells);
     }
 
-    /**
+     /**
      * Not convinced that having a resourceId made up of 2 path variables is a valid REST path,
      * but I personally prefer this approach over having a string with delimiter.
      */
@@ -64,5 +67,13 @@ public class GridController {
         return (Color)session.getAttribute(ASSIGNED_COLOR);
     }
 
+    private List<LiveCell> toLiveCellList(Map<CellPosition, CellState> liveCells) {
+        return liveCells.entrySet().stream()
+                .map(e -> toLiveCell(e.getKey(), e.getValue()))
+                .collect(toList());
+    }
 
+    private LiveCell toLiveCell(CellPosition p, CellState s) {
+        return new LiveCell(new Position(p.getX(), p.getY()), toHexColor(s.getColor()));
+    }
 }

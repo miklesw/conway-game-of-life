@@ -21,7 +21,8 @@ import static com.miklesw.conway.utils.ColorUtils.toHexColor;
 import static com.miklesw.conway.web.session.SessionAttributes.ASSIGNED_COLOR;
 import static java.util.stream.Collectors.toList;
 
-@RestController()
+@RestController
+@RequestMapping("/api/grid")
 public class GridController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GridController.class);
@@ -33,7 +34,7 @@ public class GridController {
         this.gridService = gridService;
     }
 
-    @RequestMapping(path = "/grid/size", method = RequestMethod.GET)
+    @RequestMapping(path = "/size", method = RequestMethod.GET)
     public GridSize gridSize() {
         return null;
     }
@@ -42,7 +43,7 @@ public class GridController {
      * The front-end only needs the current list of live cells to initialise grid state.
      * Dead cells can be determined using the grid size.
      */
-    @RequestMapping(path = "/grid/cells/live", method = RequestMethod.GET)
+    @RequestMapping(path = "/cells/live", method = RequestMethod.GET)
     public List<LiveCell> liveCells() {
         Map<CellPosition, CellState> liveCells = gridService.findLiveCells();
         return toLiveCellList(liveCells);
@@ -52,7 +53,7 @@ public class GridController {
      * Not convinced that having a resourceId made up of 2 path variables is a valid REST path,
      * but I personally prefer this approach over having a string with delimiter.
      */
-    @RequestMapping(path = "/grid/cells/{x}/{y}/spawn", method = RequestMethod.POST)
+    @RequestMapping(path = "/cells/{x}/{y}/spawn", method = RequestMethod.POST)
     public void spawnCell(@PathVariable int x, @PathVariable int y, HttpSession session) {
         gridService.spawnCell(new CellPosition(x, y), assignedColor(session));
     }

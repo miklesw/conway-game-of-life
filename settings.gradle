@@ -1,2 +1,4 @@
 rootProject.name = 'conway-game-of-life'
 
+include 'ui'
+

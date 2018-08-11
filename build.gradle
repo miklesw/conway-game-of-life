@@ -3,25 +3,42 @@ version '1.0-SNAPSHOT'
 
 buildscript {
     repositories {
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
         mavenCentral()
     }
     dependencies {
-        classpath(
-                "org.springframework.boot:spring-boot-gradle-plugin:2.0.4.RELEASE")
+        classpath "org.springframework.boot:spring-boot-gradle-plugin:2.0.4.RELEASE"
+        classpath "com.moowork.gradle:gradle-node-plugin:1.2.0"
     }
 }
 
 apply plugin: 'java'
 apply plugin: 'org.springframework.boot'
 
-task stage(dependsOn: ['build', 'clean'])
-build.mustRunAfter clean
-
-
 sourceCompatibility = 1.8
 
 repositories {
     mavenCentral()
+}
+
+task stage(dependsOn: ['build', 'clean'])
+build.mustRunAfter clean
+
+compileJava.dependsOn('copyUIResources')
+task copyUIResources (dependsOn:[":ui:buildUI"]){
+    doFirst {
+        logger.info("Deleting static resources..")
+        delete 'src/main/resources/public'
+    }
+    doLast {
+        logger.info("Copying static resources..")
+        copy{
+            from 'ui/dist'
+            into 'src/main/resources/public'
+        }
+    }
 }
 
 dependencies {
@@ -31,7 +48,6 @@ dependencies {
     compile group: 'com.google.guava', name: 'guava', version: '19.0'
     compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.25'
 
-
     testCompile group: 'junit', name: 'junit', version: '4.12'
     testCompile group: 'org.assertj', name: 'assertj-core', version: '3.10.0'
     testCompile group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: '2.0.4.RELEASE'
@@ -40,9 +56,4 @@ dependencies {
     testCompile group: 'com.google.code.gson', name: 'gson', version: '2.8.5'
     testCompile group: 'org.springframework.boot', name: 'spring-boot-starter-webflux', version: '2.0.4.RELEASE'
     testCompile group: 'org.awaitility', name: 'awaitility', version: '3.1.2'
-
-
-
-
-
 }

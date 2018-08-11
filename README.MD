@@ -14,7 +14,27 @@ Users will be assigned a random color that will persist for the length of their 
 This is an implementation of a recruitment technical challenge for [Fullstack-Backend Developers](https://hackmd.io/s/SyXikdg_g#Full-Stack--Backend-Developer--Eng-Manager).
 
 
-## Deployment
+## Build & Deployment 
+
+For ease of deployment and convenience, the UI has been packaged as a sub-module within the back-end app project. The [gradle-node-plugin](https://github.com/srs/gradle-node-plugin) is used to download **node & npm** and execute `npm run build`.
+
+The `copyUIResources` gradle task copies generated production UI code into the app's `src/main/resources/public` folder.
+
+This is far from ideal and would not be used in real life scenario. The UI should be an independent component deployed on a web server or reverse proxy such as **Nginx**, having mappings defined to direct requests to the backend app.
+
+### Local Builds
+
+Build: `./gradlew clean build`
+
+Run: `./gradlew bootRun`
+
+### Deploying on Heroku from Github
+
+This application is configured to build (from Github) and deploy on Heroku without any additional configuration.
+
+Git Url: https://github.com/miklesw/conway-game-of-life
+
+NOTE: Gradle buildpack must be added.
 
 ## Testing
 

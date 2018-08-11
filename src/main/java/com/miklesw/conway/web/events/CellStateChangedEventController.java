@@ -25,6 +25,7 @@ import static com.miklesw.conway.utils.ColorUtils.toHexColor;
  * Source based on https://golb.hplar.ch/2017/03/Server-Sent-Events-with-Spring.html
  */
 @Controller
+@RequestMapping("/api/grid")
 public class CellStateChangedEventController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CellStateChangedEventController.class);
@@ -32,7 +33,7 @@ public class CellStateChangedEventController {
     // TODO: this should be within a bean
     private final CopyOnWriteArrayList<SseEmitter> emitters = new CopyOnWriteArrayList<>();
 
-    @RequestMapping(value = "/grid/cells/events", method = RequestMethod.GET)
+    @RequestMapping(value = "/cells/events", method = RequestMethod.GET)
     public SseEmitter handle() {
 
         SseEmitter emitter = new SseEmitter();

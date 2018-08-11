@@ -1,5 +1,6 @@
 package com.miklesw.conway.web;
 
+import org.springframework.boot.autoconfigure.web.servlet.WebMvcAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -13,7 +14,7 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 @Import({
         WebSecurityConfig.class
 })
-public class WebConfig {
+public class WebConfig extends WebMvcAutoConfiguration {
 
     @Bean
     public HttpSessionEventPublisher httpSessionEventPublisher() {

@@ -1,0 +1,6 @@
+{
+  "name": "Conway's Game of Life",
+  "description": "Multiplayer implementation of Conway's Game of Life",
+  "image": "heroku/gradle",
+  "addons": []
+}

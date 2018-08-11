@@ -52,7 +52,7 @@ public class WebIntegrationTest {
     }
 
     private String getBaseUrl() {
-        return "http://localhost:" + port;
+        return "http://localhost:" + port + "/api";
     }
 
     @Test

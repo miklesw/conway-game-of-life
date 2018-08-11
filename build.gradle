@@ -1,9 +1,22 @@
-plugins {
-    id 'java'
-}
-
 group 'com.miklesw.conway'
 version '1.0-SNAPSHOT'
+
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath(
+                "org.springframework.boot:spring-boot-gradle-plugin:2.0.4.RELEASE")
+    }
+}
+
+apply plugin: 'java'
+apply plugin: 'org.springframework.boot'
+
+task stage(dependsOn: ['build', 'clean'])
+build.mustRunAfter clean
+
 
 sourceCompatibility = 1.8
 

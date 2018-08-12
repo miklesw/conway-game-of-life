@@ -2,6 +2,7 @@ package com.miklesw.conway.utils;
 
 import java.awt.*;
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
 public final class ColorUtils {
@@ -22,7 +23,7 @@ public final class ColorUtils {
     }
 
     public static Color randomColor() {
-        ThreadLocalRandom rand = ThreadLocalRandom.current();
+        Random rand = new Random();
         int r, g, b;
         r = rand.nextInt(255);
         g = rand.nextInt(255);

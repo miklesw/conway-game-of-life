@@ -3,10 +3,10 @@ package com.miklesw.conway.grid;
 import com.miklesw.conway.grid.events.GridEventPublisher;
 import com.miklesw.conway.grid.model.CellPosition;
 import com.miklesw.conway.grid.model.CellState;
+import com.miklesw.conway.grid.model.GridSize;
 import com.miklesw.conway.utils.ColorUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.scheduling.annotation.Scheduled;
 
 import java.awt.*;
 import java.util.*;
@@ -28,6 +28,10 @@ public class GridService {
     public GridService(Grid grid, GridEventPublisher gridEventPublisher) {
         this.grid = grid;
         this.gridEventPublisher = gridEventPublisher;
+    }
+
+    public GridSize getGridSize() {
+        return new GridSize(grid.getGridSizeX(), grid.getGridSizeY());
     }
 
     public Map<CellPosition, CellState> findLiveCells() {
@@ -119,6 +123,5 @@ public class GridService {
                 .filter(CellState::isLive)
                 .collect(toList());
     }
-
 
 }

@@ -3,7 +3,8 @@ package com.miklesw.conway.web;
 import com.miklesw.conway.grid.GridService;
 import com.miklesw.conway.grid.model.CellPosition;
 import com.miklesw.conway.grid.model.CellState;
-import com.miklesw.conway.web.model.GridSize;
+import com.miklesw.conway.grid.model.GridSize;
+import com.miklesw.conway.web.model.GridSizeResponse;
 import com.miklesw.conway.web.model.LiveCell;
 import com.miklesw.conway.web.model.Position;
 import org.slf4j.Logger;
@@ -35,8 +36,9 @@ public class GridController {
     }
 
     @RequestMapping(path = "/size", method = RequestMethod.GET)
-    public GridSize gridSize() {
-        return null;
+    public GridSizeResponse gridSize() {
+        GridSize gridSize = gridService.getGridSize();
+        return new GridSizeResponse(gridSize.getX(), gridSize.getY());
     }
 
     /**

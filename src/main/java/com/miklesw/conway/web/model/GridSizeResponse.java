@@ -1,11 +1,11 @@
 package com.miklesw.conway.web.model;
 
-public class GridSize {
+public class GridSizeResponse {
 
     private final int x;
     private final int y;
 
-    public GridSize(int x, int y) {
+    public GridSizeResponse(int x, int y) {
         this.x = x;
         this.y = y;
     }

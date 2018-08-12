@@ -19,6 +19,9 @@ public final class ColorUtils {
     }
 
     public static String toHexColor(Color color) {
+        if (color == null) {
+            return null;
+        }
         return String.format("#%02X%02X%02X", color.getRed(), color.getGreen(), color.getBlue());
     }
 

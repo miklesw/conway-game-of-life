@@ -12,13 +12,17 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyEmitter;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import static com.miklesw.conway.utils.ColorUtils.toHexColor;
+import static java.util.UUID.randomUUID;
 
 
 /**
@@ -36,7 +40,7 @@ public class CellStateChangedEventController {
     @RequestMapping(value = "/cells/events", method = RequestMethod.GET)
     public SseEmitter handle() {
 
-        SseEmitter emitter = new SseEmitter();
+        SseEmitter emitter = new SseEmitter(180_000L);
         this.emitters.add(emitter);
 
         emitter.onCompletion(() -> this.emitters.remove(emitter));
@@ -45,20 +49,25 @@ public class CellStateChangedEventController {
         return emitter;
     }
 
-
-
     @Async
     @EventListener
-    public void onCellStateChanged(CellStateChangedEvent event) {
-        LOGGER.info("Handling cell state change event for cell at {} with {}", event.getCellPosition(), event.getCellState());
+    public void onCellStateChanged(CellStateChangedEvent cellStateChangedEvent) {
+        LOGGER.info("Handling cell state change event for cell at {} with {}", cellStateChangedEvent.getCellPosition(), cellStateChangedEvent.getCellState());
 
         // TODO: Event listener shouldn't be in the controller.
+        String eventId = randomUUID().toString();
 
         List<SseEmitter> deadEmitters = new ArrayList<>();
         this.emitters.forEach(emitter -> {
             try {
-                CellStateChangeInfo cellStateChangeInfo = toCellStateChangeInfo(event);
-                emitter.send(cellStateChangeInfo);
+                CellStateChangeInfo cellStateChangeInfo = toCellStateChangeInfo(cellStateChangedEvent);
+
+                SseEmitter.SseEventBuilder event = SseEmitter.event()
+                        .data(cellStateChangeInfo)
+                        .id(eventId)
+                        .name("cellStateChangedEvent")
+                        .reconnectTime(10_000L);
+                emitter.send(event);
             } catch (Exception e) {
                 deadEmitters.add(emitter);
             }

@@ -12,8 +12,7 @@
   "dependencies": {
     "axios": "^0.18.0",
     "event-source-polyfill": "0.0.12",
-    "vue": "^2.5.2",
-    "vue-sse": "^1.0.2"
+    "vue": "^2.5.2"
   },
   "devDependencies": {
     "autoprefixer": "^7.1.2",

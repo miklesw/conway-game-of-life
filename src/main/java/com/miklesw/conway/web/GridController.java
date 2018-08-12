@@ -14,7 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpSession;
-import java.awt.Color;
+import java.awt.*;
 import java.util.List;
 import java.util.Map;
 
@@ -51,23 +51,24 @@ public class GridController {
         return toLiveCellList(liveCells);
     }
 
-     /**
+    /**
      * Not convinced that having a resourceId made up of 2 path variables is a valid REST path,
      * but I personally prefer this approach over having a string with delimiter.
      */
+    @ResponseBody
     @RequestMapping(path = "/cells/{x}/{y}/spawn", method = RequestMethod.POST)
     public void spawnCell(@PathVariable int x, @PathVariable int y, HttpSession session) {
         gridService.spawnCell(new CellPosition(x, y), assignedColor(session));
     }
 
-    @ResponseStatus(value= HttpStatus.BAD_REQUEST)
+    @ResponseStatus(value = HttpStatus.BAD_REQUEST)
     @ExceptionHandler({IllegalStateException.class})
     public String badRequest(Exception ex) {
         return ex.getMessage();
     }
 
     private Color assignedColor(HttpSession session) {
-        return (Color)session.getAttribute(ASSIGNED_COLOR);
+        return (Color) session.getAttribute(ASSIGNED_COLOR);
     }
 
     private List<LiveCell> toLiveCellList(Map<CellPosition, CellState> liveCells) {

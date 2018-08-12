@@ -7,6 +7,7 @@ import com.miklesw.conway.grid.model.GridSize;
 import com.miklesw.conway.utils.ColorUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.scheduling.annotation.Async;
 
 import java.awt.*;
 import java.util.*;
@@ -41,8 +42,9 @@ public class GridService {
                 .collect(toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
+    @Async // only async for calls from controller (method annotations don't work when called within class)
     public void spawnCell(CellPosition position, Color color) {
-        LOGGER.info("Spawning cell at {} with {}.", position, color);
+        LOGGER.info("SPAWNING cell at {} with {}.", position, color);
         grid.lock();
 
         try {
@@ -63,7 +65,7 @@ public class GridService {
     }
 
     private void killCell(CellPosition position) {
-        LOGGER.info("Killing cell at {}.", position);
+        LOGGER.info("KILLING cell at {}.", position);
         grid.lock();
 
         try {
@@ -81,7 +83,7 @@ public class GridService {
 
         grid.lock();
         try {
-            LOGGER.info("Determining next grid state.");
+            LOGGER.debug("Determining next grid state.");
             for (Map.Entry<CellPosition, CellState> gridEntry : grid.getCells().entrySet()) {
                 CellPosition cellPosition = gridEntry.getKey();
                 CellState cellState = gridEntry.getValue();
@@ -96,7 +98,7 @@ public class GridService {
                 }
             }
 
-            LOGGER.info("Applying next grid state.");
+            LOGGER.debug("Applying next grid state.");
             cellsToKill.forEach(this::killCell);
 
             // not handling runtime exception because:
@@ -104,7 +106,7 @@ public class GridService {
             // - locks will prevent race conditions when computing state
             cellsToSpawn.forEach(this::spawnCell);
 
-            LOGGER.info("Finished applying next grid state.");
+            LOGGER.debug("Finished applying next grid state.");
         } finally {
             grid.unlock();
         }

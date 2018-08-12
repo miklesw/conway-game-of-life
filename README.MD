@@ -36,11 +36,21 @@ Git Url: https://github.com/miklesw/conway-game-of-life
 
 NOTE: Gradle buildpack must be added.
 
+## Configuration
+
+grid.size.x=80
+grid.size.y=40
+grid.impl=memory
+session.color.repo.impl=memory
+grid.next.state.interval.ms=2000
+grid.next.state.enabled=true
+
+
 ## Testing
 
 TODO explain why there is not unit test for GridService. 
 
-## Design 
+## Backend Design 
 
 ### Packaging
 
@@ -122,3 +132,9 @@ SSE was chosen based on 3 considerations:
 Client-side support for Microsoft browsers can be addressed using one of many polyfils available.
 
 NOTE: **Spring Webflux's** WebClient was used to build a test SSE client, but it didn't seem to be a natural fit for the event use-case on the server. Additional reading may be required to see how it can be applied.
+
+
+### Endpoints
+
+## Frontend Design
+

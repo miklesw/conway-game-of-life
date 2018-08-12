@@ -51,13 +51,13 @@ public class InMemoryGrid implements Grid {
 
     @Override
     public void lock() {
-        LOGGER.info("Acquiring grid lock.");
+        LOGGER.debug("Acquiring grid lock.");
         lock.lock();
     }
 
     @Override
     public void unlock() {
-        LOGGER.info("Releasing grid lock.");
+        LOGGER.debug("Releasing grid lock.");
         lock.unlock();
     }
 

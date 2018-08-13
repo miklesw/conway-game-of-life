@@ -1,28 +1,27 @@
 <template>
   <div id="app">
-    <span>Game of Life</span>
     <Grid/>
   </div>
 </template>
 
 <script>
-import Grid from './components/Grid'
+  import Grid from './components/Grid'
 
-export default {
-  name: 'App',
-  components: {
-    Grid
+  export default {
+    name: 'App',
+    components: {
+      Grid
+    }
   }
-}
 </script>
 
 <style>
-#app {
-  font-family: 'Avenir', Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 10px;
-}
+  html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+  }
+  #app {
+    text-align: center;
+  }
 </style>

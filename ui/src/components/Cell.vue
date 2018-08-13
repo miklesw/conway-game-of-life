@@ -31,6 +31,7 @@
     width: 20px;
     height: 20px;
     border: 1px solid black;
+    resize: none;
     -webkit-touch-callout: none;
     -webkit-user-select: none;
     -khtml-user-select: none;

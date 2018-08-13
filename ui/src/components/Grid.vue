@@ -74,7 +74,7 @@
           });
         });
       },
-      _generateGrid: function(gridSize) {
+      _generateGrid: function (gridSize) {
         for (let y = 1; y <= gridSize.y; y++) {
           let row = [];
           for (let x = 1; x <= gridSize.x; x++) {
@@ -100,7 +100,15 @@
 <style scoped>
   table {
     border-collapse: collapse;
-    margin-left: auto;
-    margin-right: auto;
+    table-layout: fixed;
+    white-space: nowrap;
+    width: fit-content;
+    height: fit-content;
+  }
+  div.grid {
+    margin: auto;
+    overflow: scroll;
+    width: 100%;
+    height: 100vh;
   }
 </style>

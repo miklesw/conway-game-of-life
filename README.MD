@@ -34,21 +34,35 @@ This application is configured to build (from Github) and deploy on Heroku witho
 
 Git Url: https://github.com/miklesw/conway-game-of-life
 
-NOTE: Gradle buildpack must be added.
+NOTE: Gradle buildpack must be added to app on heroku.
 
 ## Configuration
 
-grid.size.x=80
-grid.size.y=40
-grid.impl=memory
-session.color.repo.impl=memory
-grid.next.state.interval.ms=2000
-grid.next.state.enabled=true
+| Property | Default | Desc |
+|---|---|---|
+| grid.size.x | n/a  | width of the grid in cells |
+| grid.size.y | n/a  | height of the grid in cells |
+| grid.impl | memory | implementation of the grid to use |
+| session.color.repo.impl | memory | implementation of the session color repository to use |
+| grid.next.state.interval.ms | n/a | interval in milliseconds to recompute grid state  |
+| grid.next.state.enabled | n/a | enable recomputation of grid state (needs to be disabled for some tests) |
 
 
 ## Testing
 
-TODO explain why there is not unit test for GridService. 
+Unit and web integration tests have been implemented as needed. Full service tests and additional coverage are desirable.
+
+### Manual testing
+
+The following features have been tested manually:
+
+- Patterns:
+    - Block
+    - Glider
+    - Beehive
+    - Blinker 
+- Color assignment for multiple browsers/user. 
+- Application of average color when spawning cells 
 
 ## Backend Design 
 
@@ -135,11 +149,55 @@ NOTE: **Spring Webflux's** WebClient was used to build a test SSE client, but it
 
 ### Endpoints
 
-/api/grid/size
-/api/grid/cells/live
-/api/grid/cells/{x}/{y}/spawn
-/api/grid/cells/events
+| Endpoint | Method | Desc |  
+|---|---|---|
+| /api/grid/size | GET |  Returns the size of the grid which is used by the front-end to generate the model and view | 
+| /api/grid/cells/live | GET | Return a list of currently live cells, so that ui can re-initialise state on connect/reconnect |  
+| /api/grid/cells/{x}/{y}/spawn | POST | Spawns a cell at a specified position |  
+| /api/grid/cells/events | GET |  Subscribes to CellStateChangedEvents |  
+
 
 ## Frontend Design
 
+### Web Framework
 
+Angular, React and Vue were considered for this project. VueJs was selected because of the following reasons:
+
+- Similarity with Angular (briefly worked with Angular in a previous role)
+- Lightweight
+- Recommended for small teams
+- Quick learning curve
+
+Axios was used for backend calls, since vue-resource is no longer recommended by Vue.
+
+### Events 
+
+Initially the event implementation was attempted using vue-sse, but it seems like this module is for an older version of Vue.
+
+EventSource was used to handle SSE events. event-source-polyfill was installed to provide support for Microsoft browsers.
+
+#### Re-connections 
+
+When the EventSource connection is lost, some events maybe be lost and the state of the grid in the UI may become out of sync.
+
+To prevent this from happening, the grid state is re-initialised every time the EventSource connection is opened (or re-opened) 
+
+### Browser Compatibility
+
+The UI was tested with Chrome 68 & Firefox 43.
+
+ES6 syntax was used, so there might be issues in older browsers (there are ways around this)
+
+### Responsive Design
+
+The grid and cells should always maintain the same size. The page is set to overflow with scrolling if the grid is larger than the viewport.
+
+### Possible Improvements
+
+- Extract API calls to a service. More reading required to find out how to inject services like in Angular.
+- Validation of vue component properties.
+- Deterioration of responsiveness after having the page open for extended periods. 
+
+## Unimplemented Features
+
+The pattern toolbar hasn't been implemented due to time constraints.

@@ -23,23 +23,31 @@
       axios.get(`/api/grid/size`)
         .then(response => {
           this._generateGrid(response.data);
-          console.log("Initializing grid of size: " + JSON.stringify(gridSize));
         })
         .catch(e => {
           console.log("Failed to initialize grid: " + e);
         });
     },
-    created() {
-      this.updateGridState();
-    },
     mounted() {
       evtSource = new EventSource("/api/grid/cells/events");
       let self = this;
+
+      evtSource.onopen = function() {
+        console.log("EventSource connection opened.");
+        self.updateGridState();
+      };
+
+      evtSource.onerror = function() {
+        console.log("EventSource failed.");
+      };
+
+
       evtSource.addEventListener('cellStateChangedEvent', function (event) {
-        console.log("Received cell event " + JSON.stringify(event));
         const data = JSON.parse(event.data);
+        // console.log("Received cellStateChangedEvent with payload  " + JSON.stringify(event.data));
         self._updateCellState(data.position, data.live, data.color);
       }, false);
+
     },
     beforeDestroy() {
       if (evtSource !== false) {
@@ -60,7 +68,7 @@
           });
       },
       _updateCellState: function (position, live, color) {
-        console.log("Updating cell " + JSON.stringify(position) + " with state " + live + " " + color);
+        // console.log("Updating cell " + JSON.stringify(position) + " with state " + live + " " + color);
         let cells = this.rows[position.y - 1];
         let cell = cells[position.x - 1];
         cell.live = live;
@@ -75,6 +83,7 @@
         });
       },
       _generateGrid: function (gridSize) {
+        console.log("Initializing grid of size: " + JSON.stringify(gridSize));
         for (let y = 1; y <= gridSize.y; y++) {
           let row = [];
           for (let x = 1; x <= gridSize.x; x++) {
@@ -105,6 +114,7 @@
     width: fit-content;
     height: fit-content;
   }
+
   div.grid {
     margin: auto;
     overflow: scroll;

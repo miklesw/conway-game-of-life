@@ -77,7 +77,7 @@ public class GridService {
     }
 
     public void computeNextState() {
-        LOGGER.info("Computing next grid state.");
+        LOGGER.debug("Computing next grid state.");
         Set<CellPosition> cellsToKill = new HashSet<>();
         Map<CellPosition, Color> cellsToSpawn = new HashMap<>();
 

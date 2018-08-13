@@ -133,8 +133,13 @@ Client-side support for Microsoft browsers can be addressed using one of many po
 
 NOTE: **Spring Webflux's** WebClient was used to build a test SSE client, but it didn't seem to be a natural fit for the event use-case on the server. Additional reading may be required to see how it can be applied.
 
-
 ### Endpoints
 
+/api/grid/size
+/api/grid/cells/live
+/api/grid/cells/{x}/{y}/spawn
+/api/grid/cells/events
+
 ## Frontend Design
+
 

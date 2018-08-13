@@ -55,6 +55,7 @@ public class CellStateChangedEventController {
         LOGGER.info("Handling cell state change event for cell at {} with {}", cellStateChangedEvent.getCellPosition(), cellStateChangedEvent.getCellState());
 
         // TODO: Event listener shouldn't be in the controller.
+
         String eventId = randomUUID().toString();
 
         List<SseEmitter> deadEmitters = new ArrayList<>();

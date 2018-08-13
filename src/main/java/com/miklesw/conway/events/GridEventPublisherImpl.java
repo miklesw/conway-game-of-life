@@ -20,7 +20,7 @@ public class GridEventPublisherImpl implements GridEventPublisher {
 
     @Override
     public void publishCellChangedEvent(CellPosition position, CellState state) {
-        LOGGER.info("Publishing cell change event for {} with {}", position, state);
+        LOGGER.debug("Publishing cell change event for {} with {}", position, state);
         eventPublisher.publishEvent(new CellStateChangedEvent(position, state));
     }
 }

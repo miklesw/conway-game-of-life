@@ -42,7 +42,7 @@ public class GridService {
                 .collect(toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
-    @Async // only async for calls from controller (method annotations don't work when called within class)
+    //TODO: change to async (needs reworking of tests)
     public void spawnCell(CellPosition position, Color color) {
         LOGGER.info("SPAWNING cell at {} with {}.", position, color);
         grid.lock();

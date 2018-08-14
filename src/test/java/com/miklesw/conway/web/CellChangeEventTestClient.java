@@ -9,6 +9,7 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.Disposable;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -24,27 +25,32 @@ public class CellChangeEventTestClient {
 
     private ObjectMapper objectMapper = new ObjectMapper();
 
+    private Disposable eventSubscription;
+
     public CellChangeEventTestClient(String serverBaseUrl) {
         this.client = WebClient.create(serverBaseUrl);
+
     }
 
     public void listenToEvents() {
         receivedEvents.clear();
-        client.get().uri("/grid/cells/events")
+        eventSubscription = client.get().uri("/grid/cells/events")
                 .accept(MediaType.TEXT_EVENT_STREAM)
                 .retrieve()
-                .bodyToFlux(new ParameterizedTypeReference<ServerSentEvent<String>>() {})
+                .bodyToFlux(new ParameterizedTypeReference<ServerSentEvent<String>>() {
+                })
                 .subscribe(this::handleEvent);
+
     }
 
     public void handleEvent(ServerSentEvent<String> event) {
         try {
+            LOGGER.info("Handling event {} " + event);
             CellStateChangeInfo cellStateChangeInfo = objectMapper.readValue(event.data(), CellStateChangeInfo.class);
             receivedEvents.add(cellStateChangeInfo);
         } catch (IOException e) {
             LOGGER.warn("Failed to handle SSE payload for {} " + event);
         }
-
     }
 
     public List<CellStateChangeInfo> getReceivedEvents() {
@@ -53,5 +59,11 @@ public class CellChangeEventTestClient {
 
     public boolean receivedEvent(CellStateChangeInfo cellStateChangeInfo) {
         return receivedEvents.contains(cellStateChangeInfo);
+    }
+
+    public void close(){
+        if (eventSubscription!= null && !eventSubscription.isDisposed()) {
+            this.eventSubscription.dispose();
+        }
     }
 }

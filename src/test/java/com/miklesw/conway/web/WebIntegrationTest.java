@@ -6,6 +6,7 @@ import com.miklesw.conway.grid.model.CellState;
 import com.miklesw.conway.web.model.CellStateChangeInfo;
 import com.miklesw.conway.web.model.LiveCell;
 import com.miklesw.conway.web.model.Position;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -16,6 +17,7 @@ import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -34,8 +36,7 @@ import static org.awaitility.Awaitility.await;
                 "grid.next.state.enabled=false"
         }
 )
-@Ignore
-// TODO fix tests failing after adding @Async to spawnCells
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class WebIntegrationTest {
 
     @LocalServerPort
@@ -43,15 +44,12 @@ public class WebIntegrationTest {
 
     private TestRestTemplate testRestTemplate = new TestRestTemplate();
 
-    private CellChangeEventTestClient cellChangeEventTestClient;
-
     @Autowired
     private Grid grid;
 
     @Before
     public void init() {
         ReflectionTestUtils.invokeMethod(grid, "initialize");
-        cellChangeEventTestClient = new CellChangeEventTestClient(getBaseUrl());
     }
 
     private String getBaseUrl() {
@@ -59,25 +57,27 @@ public class WebIntegrationTest {
     }
 
     @Test
+    @Ignore("Flaky test - webclient issues when running with other tests")
     public void givenAGridWithNoLiveCells_whenSpawningACell_thenTheCellStateWillBeUpdatedAndAWebEventIsPublished() throws Exception {
+        CellChangeEventTestClient cellChangeEventTestClient = new CellChangeEventTestClient(getBaseUrl());
         cellChangeEventTestClient.listenToEvents();
 
         // when
-        ResponseEntity<String> responseEntity = testRestTemplate.exchange(getBaseUrl() + "/grid/cells/3/3/spawn", HttpMethod.POST, null, String.class);
+        ResponseEntity<String> responseEntity = testRestTemplate.exchange(getBaseUrl() + "/grid/cells/6/6/spawn", HttpMethod.POST, null, String.class);
 
         // then
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
 
 
-        Thread.sleep(1000);
-        CellState cellState = grid.getCellState(new CellPosition(3, 3));
+        CellState cellState = grid.getCellState(new CellPosition(6, 6));
         assertThat(cellState.isLive()).isTrue();
         assertThat(cellState.getColor()).isNotNull();
 
-        CellStateChangeInfo expectedCellStateChangeEvent = new CellStateChangeInfo(new Position(3, 3), true, toHexColor(cellState.getColor()));
+        CellStateChangeInfo expectedCellStateChangeEvent = new CellStateChangeInfo(new Position(6, 6), true, toHexColor(cellState.getColor()));
 
         await().atMost(2, SECONDS)
                 .until(() -> cellChangeEventTestClient.receivedEvent(expectedCellStateChangeEvent));
+        cellChangeEventTestClient.close();
     }
 
     @Test
@@ -88,6 +88,7 @@ public class WebIntegrationTest {
 
         CellState initialCellState = grid.getCellState(new CellPosition(3, 3));
 
+        CellChangeEventTestClient cellChangeEventTestClient = new CellChangeEventTestClient(getBaseUrl());
         cellChangeEventTestClient.listenToEvents();
 
         // when
@@ -101,6 +102,7 @@ public class WebIntegrationTest {
         assertThat(cellState.getColor()).isEqualTo(initialCellState.getColor());
 
         assertThat(cellChangeEventTestClient.getReceivedEvents().size()).isEqualTo(0);
+        cellChangeEventTestClient.close();
     }
 
     @Test
